@@ -3,17 +3,23 @@ const axios = require("axios");
 
 jest.mock("axios");
 
-describe("POST /feedback", () => {
-  let app;
+// Env must be set BEFORE requiring the server, since toADF/route imports run at load time.
+process.env.JIRA_BASE_URL = "https://example.atlassian.net";
+process.env.JIRA_EMAIL = "tester@example.com";
+process.env.JIRA_API_TOKEN = "token-123";
+process.env.JIRA_PROJECT_KEY = "ABC";
+process.env.JIRA_ISSUE_TYPE = "Task";
 
+const { app } = require("../server");
+
+describe("POST /feedback", () => {
   beforeEach(() => {
-    jest.resetModules();
+    // Restore Jira env in case a previous test removed it
     process.env.JIRA_BASE_URL = "https://example.atlassian.net";
     process.env.JIRA_EMAIL = "tester@example.com";
     process.env.JIRA_API_TOKEN = "token-123";
     process.env.JIRA_PROJECT_KEY = "ABC";
     process.env.JIRA_ISSUE_TYPE = "Task";
-    ({ app } = require("../server"));
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -36,6 +42,7 @@ describe("POST /feedback", () => {
       message: "Issue created successfully!",
       issueKey: "ABC-42",
     });
+    expect(axios.post).toHaveBeenCalledTimes(1);
 
     const [url, body, opts] = axios.post.mock.calls[0];
     expect(url).toBe("https://example.atlassian.net/rest/api/3/issue");
@@ -67,7 +74,7 @@ describe("POST /feedback", () => {
     expect(res.status).toBe(400);
   });
 
-  test("bubbles up Jira error status", async () => {
+  test("bubbles up Jira error status when upstream responds with an error", async () => {
     axios.post.mockRejectedValue({
       response: { status: 401, data: { errorMessages: ["Unauthorized"] } },
     });
@@ -80,12 +87,22 @@ describe("POST /feedback", () => {
     expect(res.body.message).toBe("Error creating Jira issue");
   });
 
-  test("returns 500 when Jira env vars are missing", async () => {
-    jest.resetModules();
-    delete process.env.JIRA_BASE_URL;
-    const { app: freshApp } = require("../server");
+  test("returns 502 when Jira is unreachable (no upstream response)", async () => {
+    axios.post.mockRejectedValue(new Error("ECONNREFUSED"));
 
-    const res = await request(freshApp)
+    const res = await request(app)
+      .post("/feedback")
+      .send({ summary: "S", description: "D" });
+
+    expect(res.status).toBe(502);
+    expect(res.body.message).toBe("Error creating Jira issue");
+    expect(res.body.error).toBe("ECONNREFUSED");
+  });
+
+  test("returns 500 when Jira env vars are missing", async () => {
+    delete process.env.JIRA_BASE_URL;
+
+    const res = await request(app)
       .post("/feedback")
       .send({ summary: "S", description: "D" });
 
