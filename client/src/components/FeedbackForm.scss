@@ -1,0 +1,80 @@
+@use "../styles/variables" as *;
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+
+    span {
+      font-weight: 600;
+      color: $color-text;
+    }
+
+    input,
+    select,
+    textarea {
+      font: inherit;
+      color: $color-text;
+      padding: 8px 10px;
+      border: 1px solid $color-border;
+      border-radius: $radius;
+      background: $color-surface;
+      transition: border-color 0.15s, box-shadow 0.15s;
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+        box-shadow: 0 0 0 2px rgba($color-primary, 0.2);
+      }
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+  }
+
+  &__submit {
+    align-self: flex-start;
+    background: $color-primary;
+    color: #fff;
+    border: 0;
+    border-radius: $radius;
+    padding: 10px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover:not(:disabled) {
+      background: $color-primary-dark;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &__message {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: $radius;
+    font-size: 14px;
+
+    &--success {
+      background: rgba($color-success, 0.1);
+      color: $color-success;
+    }
+
+    &--error {
+      background: rgba($color-error, 0.1);
+      color: $color-error;
+    }
+  }
+}

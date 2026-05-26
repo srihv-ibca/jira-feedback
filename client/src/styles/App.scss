@@ -1,0 +1,29 @@
+@use "./variables" as *;
+
+.app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 16px;
+
+  &__header {
+    margin-bottom: 32px;
+    text-align: center;
+
+    h1 {
+      margin: 0 0 8px;
+      color: $color-primary;
+    }
+
+    p {
+      margin: 0;
+      color: $color-muted;
+    }
+  }
+
+  &__main {
+    background: $color-surface;
+    border-radius: $radius;
+    box-shadow: $shadow;
+    padding: 24px;
+  }
+}
