@@ -1,6 +1,6 @@
 # Jira Feedback
 
-A small full-stack app that lets users submit feedback through a web form and creates a Jira issue from each submission.
+A small full-stack app that lets users submit feedback through a web form and creates a Jira issue from each submission(Initially developed  be part of ONS design system, now a standalone application). 
 
 - **Backend** — Node.js + Express (`backend/`)
 - **Frontend** — React + Sass (`client/`)
